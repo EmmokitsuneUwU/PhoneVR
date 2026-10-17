@@ -1,0 +1,88 @@
+diff --git a/code/windows/PhoneVR/PhoneVR/PVRFileManager.h b/code/windows/PhoneVR/PhoneVR/PVRFileManager.h
+index 9c5e11e..b6606b5 100644
+--- a/code/windows/PhoneVR/PhoneVR/PVRFileManager.h
++++ b/code/windows/PhoneVR/PhoneVR/PVRFileManager.h
+@@ -29,6 +29,9 @@ ccc KEYINT_MAX_KEY = "keyint_max";
+ ccc I_REFRESH_KEY = "intra_refresh";
+ ccc BITRATE_KEY = "bitrate";
+ ccc PROFILE_KEY = "profile";
++ccc CRF_KEY = "crf";
++ccc VBV_MAX_KEY = "vbv_max_bitrate";
++ccc VBV_BUF_KEY = "vbv_buffer";
+ ccc CONN_TIMEOUT = "connection_timeout";
+ 
+ namespace {
+@@ -53,6 +56,9 @@ namespace {
+                                          {I_REFRESH_KEY, false},
+                                          {BITRATE_KEY, -1},
+                                          {PROFILE_KEY, "baseline"},
++                                         {CRF_KEY, 18.0},
++                                         {VBV_MAX_KEY, 30000},
++                                         {VBV_BUF_KEY, 0},
+                                      }}};
+ 
+     // const wchar_t *const setsFile = L"C:\\Program Files\\PhoneVR\\pvrsettings.json";
+diff --git a/code/windows/PhoneVR/PhoneVR/PVRSockets.cpp b/code/windows/PhoneVR/PhoneVR/PVRSockets.cpp
+index f75cb3d..aa3d85b 100644
+--- a/code/windows/PhoneVR/PhoneVR/PVRSockets.cpp
++++ b/code/windows/PhoneVR/PhoneVR/PVRSockets.cpp
+@@ -1,5 +1,6 @@
+ #include "PVRSockets.h"
+ 
++#include <algorithm>
+ #include <chrono>
+ #include <fstream>
+ #include <queue>
+@@ -182,22 +183,22 @@ void PVRStartStreamer(string ip,
+         }
+         res = x264_param_apply_profile(&par, PVRProp<string>({S, PROFILE_KEY}).c_str());
+ 
+-        par.rc.i_rc_method = 1;
+-
+-        par.rc.i_bitrate = 1000;
+-        par.rc.i_vbv_max_bitrate = 1200;
+-        par.rc.i_vbv_buffer_size = 20000;
+-        par.rc.f_vbv_buffer_init = 0.9f;
++        {
++            const auto crf = PVRProp<float>({S, CRF_KEY});
++            const auto vbvMax = PVRProp<int>({S, VBV_MAX_KEY});
++            const auto vbvBuf = PVRProp<int>({S, VBV_BUF_KEY});
+ 
+-        // par.rc.i_qp_constant = 25;
+-        // par.rc.i_qp_min = par.rc.i_qp_constant - 1;
+-        // par.rc.i_qp_max = par.rc.i_qp_constant + 1;
+-        // par.rc.f_qcompress = 0.0f;
++            if (par.rc.i_rc_method == X264_RC_CRF) {
++                par.rc.f_rf_constant = crf;
++                par.rc.f_rf_constant_max = crf + 2;
++            }
+ 
+-        // par.rc.f_rf_constant = 12;
+-        // par.rc.f_rf_constant_max = 13;
+-        par.rc.f_rf_constant = 24;
+-        par.rc.f_rf_constant_max = 26;
++            if (vbvMax > 0) {
++                par.rc.i_vbv_max_bitrate = vbvMax;
++                par.rc.i_vbv_buffer_size = vbvBuf > 0 ? vbvBuf : std::max(vbvMax / (int) fps * 2, 1);
++                par.rc.f_vbv_buffer_init = 0.9f;
++            }
++        }
+ 
+         // par.nalu_process           TODO: callback available!!!!!!!!! manage a udp thread inside
+         // here, then dispatch sends
+diff --git a/driver/PVRServer/pvrsettings.json b/driver/PVRServer/pvrsettings.json
+index 12e5d24..878bea4 100644
+--- a/driver/PVRServer/pvrsettings.json
++++ b/driver/PVRServer/pvrsettings.json
+@@ -9,6 +9,9 @@
+         "preset" : "ultrafast",
+         "tune" : "zerolatency",
+         "qp" : 20,
+-        "profile" : "baseline"
++        "profile" : "baseline",
++        "crf" : 18,
++        "vbv_max_bitrate" : 30000,
++        "vbv_buffer" : 0
+     }
+ }
+\ No newline at end of file

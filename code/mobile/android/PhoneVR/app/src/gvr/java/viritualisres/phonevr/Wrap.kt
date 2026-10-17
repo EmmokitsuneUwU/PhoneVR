@@ -1,6 +1,7 @@
 /* (C)2023 */
 package viritualisres.phonevr
 
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.view.Surface
@@ -72,7 +73,11 @@ internal object Wrap {
                 tDelayTillUpdateCallms)
     }
 
-    external fun createRenderer(gvrCtx: Long)
+    external fun createRenderer(context: Context, reverseLandscape: Boolean)
+
+    external fun setScreenSize(width: Int, height: Int)
+
+    external fun scanViewerQr(context: Context)
 
     external fun setVStreamPort(port: Int)
 
@@ -86,6 +91,14 @@ internal object Wrap {
         enableWarp: Boolean,
         enableDebug: Boolean
     ): Int
+
+    external fun setImageParams(
+        brightness: Float,
+        contrast: Float,
+        gamma: Float,
+        saturation: Float,
+        sharpness: Float
+    )
 
     external fun drawFrame(pts: Long)
 

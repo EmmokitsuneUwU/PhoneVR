@@ -10,7 +10,8 @@ set(ANDROID_STL c++_static)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
 
 
-set(gvr_libs_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../libraries_gvr)
+set(cardboard_libs_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../libraries)
+set(cardboard_include_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../../cardboard)
 file(GLOB_RECURSE LIB_SRC
     ../../../../../../common/libs/ifaddrs/*.c
     ../../../../../../common/libs/json/single_include/*.hpp
@@ -27,7 +28,7 @@ IF (NOT "${ANDROID_ABI}" STREQUAL "x86_64")
     )
 
     target_include_directories(native-lib-gvr
-        PUBLIC ${gvr_libs_dir}/headers
+        PUBLIC ${cardboard_include_dir}
         PUBLIC ../../../../../../common/libs/asio/asio/include
         PUBLIC ../../../../../../common/libs/eigen/Eigen
         PUBLIC ../../../../../../common/libs/ifaddrs
@@ -39,7 +40,6 @@ IF (NOT "${ANDROID_ABI}" STREQUAL "x86_64")
 
     target_link_libraries(native-lib-gvr
         log android EGL GLESv3 mediandk
-        ${gvr_libs_dir}/jni/${ANDROID_ABI}/libgvr.so
-        ${gvr_libs_dir}/jni/${ANDROID_ABI}/libgvr_audio.so
+        ${cardboard_libs_dir}/jni/${ANDROID_ABI}/libGfxPluginCardboard.so
     )
 ENDIF ()

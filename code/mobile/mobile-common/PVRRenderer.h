@@ -1,13 +1,9 @@
 #pragma once
 
-#include "vr/gvr/capi/include/gvr.h"
+#include <jni.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
-
-namespace PVR {
-    extern std::unique_ptr<gvr::GvrApi> gvrApi;
-}
-
 extern "C" {
 #endif
 
@@ -20,15 +16,15 @@ unsigned int PVRInitSystem(int maxWidth,
                            bool debug);   // return render texture id
 void PVRRender(int64_t pts);
 void PVRTrigger();
+void PVRSetImageParams(
+    float brightness, float contrast, float gamma, float saturation, float sharpness);
+void PVRSetScreenSize(int width, int height);
 void PVRPause();
 void PVRResume();
-void PVRDestroyGVR();
-
-#ifdef __ANDROID__
-void PVRCreateGVR(gvr_context *gvr_ctx);
-#else
-void PVRCreateGVRAndContext();
-#endif
+void PVRDestroyCardboard();
+void PVRCreateCardboard(JavaVM *vm, jobject context, bool reverseLandscape);
+void PVRScanViewerQr(JavaVM *vm, jobject context);
+bool PVRGetHeadRotation(float *quatWxyz);
 
 #ifdef __cplusplus
 }

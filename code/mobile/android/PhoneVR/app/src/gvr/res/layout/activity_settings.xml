@@ -259,6 +259,104 @@
         android:digits="0123456789.," />
 
     <LinearLayout
+        android:id="@+id/imageSettings"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/offFov">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/img_brightness" />
+
+        <EditText
+            android:id="@+id/imgBrightness"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="numberDecimal|numberSigned"
+            android:digits="-0123456789.,"
+            android:text="@string/_00_0" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/img_contrast" />
+
+        <EditText
+            android:id="@+id/imgContrast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="numberDecimal"
+            android:digits="0123456789.,"
+            android:text="@string/_00_0" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/img_gamma" />
+
+        <EditText
+            android:id="@+id/imgGamma"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="numberDecimal"
+            android:digits="0123456789.,"
+            android:text="@string/_00_0" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/img_saturation" />
+
+        <EditText
+            android:id="@+id/imgSaturation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="numberDecimal"
+            android:digits="0123456789.,"
+            android:text="@string/_00_0" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/img_sharpness" />
+
+        <EditText
+            android:id="@+id/imgSharpness"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="numberDecimal"
+            android:digits="0123456789.,"
+            android:text="@string/_00_0" />
+
+        <Button
+            android:id="@+id/btScanViewer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/scan_viewer_qr" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/btLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -271,7 +369,7 @@
         tools:layout_editor_absoluteX="20dp"
         tools:layout_editor_absoluteY="637dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/offFov">
+        app:layout_constraintTop_toBottomOf="@+id/imageSettings">
 
     <Button
         android:id="@+id/btOpenLogs"

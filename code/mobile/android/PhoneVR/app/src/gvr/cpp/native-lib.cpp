@@ -1,3 +1,11 @@
+#include <array>
+#include <cstring>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <vector>
+
 #include <android/native_window_jni.h>
 #include <jni.h>
 #include <media/NdkMediaCodec.h>
@@ -18,7 +26,6 @@
 
 using namespace std;
 using namespace Eigen;
-using namespace gvr;
 using namespace PVR;
 
 #define JNI_VERS  JNI_VERSION_1_6
@@ -336,14 +343,7 @@ SUB(startSendSensorData)(JNIEnv *env, jclass, jint port) {
 
     try {
         PVRStartSendSensorData(port, [](float *quat, float *acc) {
-            if (gvrApi) {
-                auto gmat = gvrApi->GetHeadSpaceFromStartSpaceRotation(GvrApi::GetTimePointNow());
-                Quaternionf equat(Map<Matrix3f>(GetMat3(gmat.m).data()));
-
-                quat[0] = equat.w();
-                quat[1] = equat.x();
-                quat[2] = equat.y();
-                quat[3] = equat.z();
+            if (PVRGetHeadRotation(quat)) {
                 memcpy(acc, newAcc, 3 * 4);
                 return true;
             }
@@ -369,10 +369,12 @@ SUB(setAccData)(JNIEnv *env, jclass, jfloatArray jarr) {
 }
 
 ///////////////////////////////////// system control & events /////////////////////////////////////
-SUB(createRenderer)(JNIEnv *, jclass, jlong jGvrApi) {
+SUB(createRenderer)(JNIEnv *env, jclass, jobject context, jboolean reverseLandscape) {
     PVR_DB_I("JNI createRenderer");
     try {
-        PVRCreateGVR(reinterpret_cast<gvr_context *>(jGvrApi));
+        JavaVM *vm = nullptr;
+        env->GetJavaVM(&vm);
+        PVRCreateCardboard(vm, env->NewGlobalRef(context), reverseLandscape);
     } catch (exception e) {
         PVR_DB_I("JNI_createRenderer:: Caught Exception: " + string(e.what()));
     }
@@ -538,7 +540,7 @@ SUB(stopAll)(JNIEnv *) {
     try {
         pvrState = PVR_STATE_SHUTDOWN;
         PVRStopStreams();
-        PVRDestroyGVR();
+        PVRDestroyCardboard();
 
         mediaThr->join();
         delete mediaThr;
@@ -557,6 +559,7 @@ FUNC(jint, initSystem)
 (JNIEnv *, jclass, jint x, jint y, jint resMul, jfloat offFov, jboolean reproj, jboolean debug) {
     try {
         int w = (x > y ? x : y), h = (x > y ? y : x);
+        PVRSetScreenSize(w, h);
         maxWidth = min(w / 8, resMul * w / h) *
                    8;   // keep pixel aspect ratio (does not influence image aspect ratio)
         maxHeight = min(h / 8, resMul) * 8;
@@ -564,6 +567,21 @@ FUNC(jint, initSystem)
     } catch (exception e) {
         PVR_DB_I("JNI_initSystem:: Caught Exception: " + string(e.what()));
     }
+}
+
+SUB(setScreenSize)(JNIEnv *, jclass, jint width, jint height) {
+    PVRSetScreenSize(width, height);
+}
+
+SUB(scanViewerQr)(JNIEnv *env, jclass, jobject context) {
+    JavaVM *vm = nullptr;
+    env->GetJavaVM(&vm);
+    PVRScanViewerQr(vm, env->NewGlobalRef(context));
+}
+
+SUB(setImageParams)
+(JNIEnv *, jclass, jfloat brightness, jfloat contrast, jfloat gamma, jfloat saturation, jfloat sharpness) {
+    PVRSetImageParams(brightness, contrast, gamma, saturation, sharpness);
 }
 
 SUB(drawFrame)(JNIEnv *env, jclass, jlong pts) {

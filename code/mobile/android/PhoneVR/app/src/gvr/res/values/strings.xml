@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name" translatable="false">@string/app_name_full</string>
     <string name="phonevr_support_extra">Select either one based on your setup.</string>
+    <string name="img_brightness">Brightness (-0.5 to 0.5, default 0)</string>
+    <string name="img_contrast">Contrast (0.5 to 2, default 1)</string>
+    <string name="img_gamma">Gamma (0.5 to 2, default 1; higher = brighter midtones)</string>
+    <string name="img_saturation">Saturation (0 to 2, default 1)</string>
+    <string name="img_sharpness">Sharpness (0 to 2, default 0)</string>
+    <string name="scan_viewer_qr">Scan viewer QR code</string>
 </resources>

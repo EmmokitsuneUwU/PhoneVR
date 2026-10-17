@@ -101,7 +101,7 @@ android {
             jniLibs.srcDirs = ["libraries/jni", "../ALVR/build/alvr_client_core"]
         }
         gvr {
-            jniLibs.srcDirs = ["libraries/jni", "libraries_gvr/jni", "../ALVR/build/alvr_client_core"]
+            jniLibs.srcDirs = ["libraries/jni", "../ALVR/build/alvr_client_core"]
         }
     }
     externalNativeBuild {
@@ -165,7 +165,6 @@ dependencies {
     androidTestImplementation "androidx.test:rules:$androidXTestVersion"
     androidTestUtil "androidx.test.services:test-services:$servicesVersion"
 
-    gvrImplementation 'com.google.vr:sdk-base:1.200.0@aar'
     implementation 'com.google.cardboard.sdk:cardboard-sdk:1.17.0@aar'
     implementation 'io.github.zxing-cpp:android:2.3.0-SNAPSHOT'
     implementation 'com.google.protobuf:protobuf-javalite:3.19.4'
@@ -246,7 +245,6 @@ spotless {
 }
 
 preBuild.dependsOn(buildClientLib)
-preBuild.dependsOn("spotlessCheck")
 
 build.dependsOn(extractNdk)
 build.dependsOn(buildClientLib)

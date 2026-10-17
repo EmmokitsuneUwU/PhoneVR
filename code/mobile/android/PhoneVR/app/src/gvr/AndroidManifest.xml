@@ -7,7 +7,6 @@
         <activity
             android:name=".GameActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:enableVrMode="@string/gvr_vr_mode_component"
             android:resizeableActivity="false"
             android:screenOrientation="landscape"
             android:theme="@style/GameTheme" />

@@ -21,8 +21,6 @@ import android.view.View
 import android.view.WindowInsets
 import android.widget.FrameLayout
 import android.widget.TextView
-import com.google.vr.ndk.base.AndroidCompat
-import com.google.vr.ndk.base.GvrLayout
 import java.util.concurrent.locks.ReentrantLock
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -32,7 +30,6 @@ class GameActivity : Activity(), SensorEventListener {
     private lateinit var sensMgr: SensorManager
     private lateinit var prefs: SharedPreferences
     private lateinit var surf: GLSurfaceView
-    private lateinit var gvrLayout: GvrLayout
 
     private var uiFPSTextViewUpdatethread: Thread? = null
     private var fpsMutex: ReentrantLock = ReentrantLock()
@@ -76,7 +73,6 @@ class GameActivity : Activity(), SensorEventListener {
 
     var fpsCounter: Int = 0 // For storing previous 5 Fps Values
 
-    private var isDaydream = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -85,7 +81,6 @@ class GameActivity : Activity(), SensorEventListener {
         sensMgr = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         prefs = getSharedPreferences(pvrPrefsKey, Context.MODE_PRIVATE)
         surf = GLSurfaceView(this)
-        gvrLayout = GvrLayout(this)
 
         val mainActRot = intent.getIntExtra("MAINLAYOUT_ROT", Surface.ROTATION_0)
         if (mainActRot == Surface.ROTATION_270) {
@@ -105,7 +100,7 @@ class GameActivity : Activity(), SensorEventListener {
             }
         }
 
-        Wrap.createRenderer(gvrLayout.gvrApi.nativeGvrContext)
+        Wrap.createRenderer(this, mainActRot == Surface.ROTATION_270)
 
         with(surf) {
             setEGLContextClientVersion(3)
@@ -122,18 +117,9 @@ class GameActivity : Activity(), SensorEventListener {
                 false
             }
         }
-        gvrLayout.setPresentationView(surf)
-        gvrLayout.uiLayout.setCloseButtonListener { onBackPressed() }
-        // setContentView(gvrLayout)
-
         setContentView(R.layout.activity_game)
         val gameActivityLayout = findViewById<FrameLayout>(R.id.gvrRootLayout)
-        gameActivityLayout.addView(gvrLayout)
-
-        if (gvrLayout.setAsyncReprojectionEnabled(true))
-            AndroidCompat.setSustainedPerformanceMode(this, true)
-
-        isDaydream = AndroidCompat.setVrModeEnabled(this, true)
+        gameActivityLayout.addView(surf)
 
         // getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -210,7 +196,6 @@ class GameActivity : Activity(), SensorEventListener {
     override fun onPause() {
         Wrap.onPause()
         surf.onPause()
-        gvrLayout.onPause()
         sensMgr.unregisterListener(this)
         if (uiFPSTextViewUpdatethread != null) fpsResumeMutex.lock()
         super.onPause()
@@ -223,7 +208,6 @@ class GameActivity : Activity(), SensorEventListener {
                 Sensor.TYPE_LINEAR_ACCELERATION) // Sensor.TYPE_ROTATION_VECTOR for orientation
         sensMgr.registerListener(
             this, acc, SensorManager.SENSOR_DELAY_FASTEST, 1000) // max 5ms latency
-        gvrLayout.onResume()
         surf.onResume()
         Wrap.onResume()
 
@@ -237,7 +221,6 @@ class GameActivity : Activity(), SensorEventListener {
 
     override fun onDestroy() {
         Wrap.stopAll()
-        gvrLayout.shutdown()
         super.onDestroy()
     }
 
@@ -328,6 +311,13 @@ class GameActivity : Activity(), SensorEventListener {
                     prefs.getBoolean(warpKey, warpDef),
                     prefs.getBoolean(debugKey, debugDef))
 
+            Wrap.setImageParams(
+                prefs.getFloat(imgBrightnessKey, imgBrightnessDef),
+                prefs.getFloat(imgContrastKey, imgContrastDef),
+                prefs.getFloat(imgGammaKey, imgGammaDef),
+                prefs.getFloat(imgSaturationKey, imgSaturationDef),
+                prefs.getFloat(imgSharpnessKey, imgSharpnessDef))
+
             surfTex = SurfaceTexture(texID, false) // true <- single buffer mode
 
             val s = Surface(surfTex)
@@ -342,7 +332,7 @@ class GameActivity : Activity(), SensorEventListener {
         }
 
         override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
-            // Log.d("PhoneVR", "onSurfaceChanged" + width.toString() + "x" + height.toString());
+            Wrap.setScreenSize(width, height)
         }
 
         override fun onDrawFrame(gl: GL10) {

@@ -69,3 +69,18 @@ val warpDef = false // ReProj
 
 val debugKey = "debug"
 val debugDef = false
+
+val imgBrightnessKey = "imgBrightness"
+val imgBrightnessDef = 0.0f
+
+val imgContrastKey = "imgContrast"
+val imgContrastDef = 1.0f
+
+val imgGammaKey = "imgGamma"
+val imgGammaDef = 1.0f
+
+val imgSaturationKey = "imgSaturation"
+val imgSaturationDef = 1.0f
+
+val imgSharpnessKey = "imgSharpness"
+val imgSharpnessDef = 0.0f

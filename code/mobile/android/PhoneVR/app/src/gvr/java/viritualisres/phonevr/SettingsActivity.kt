@@ -31,6 +31,8 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(binding.root)
         loadPrefs()
 
+        findViewById<Button>(R.id.btScanViewer).setOnClickListener { Wrap.scanViewerQr(this) }
+
         val etLogView = findViewById<TextView>(R.id.etLogView)
 
         setTextToLogger(etLogView)
@@ -277,12 +279,22 @@ class SettingsActivity : AppCompatActivity() {
                 putFloat(offFovKey, binding.offFov.text.toString().replace(',', '.').toFloat())
                 putBoolean(warpKey, binding.warp.isChecked)
                 putBoolean(debugKey, binding.debug.isChecked)
+                putFloat(imgBrightnessKey, parseImg(binding.imgBrightness.text.toString(), imgBrightnessDef, -0.5f, 0.5f))
+                putFloat(imgContrastKey, parseImg(binding.imgContrast.text.toString(), imgContrastDef, 0.5f, 2.0f))
+                putFloat(imgGammaKey, parseImg(binding.imgGamma.text.toString(), imgGammaDef, 0.5f, 2.0f))
+                putFloat(imgSaturationKey, parseImg(binding.imgSaturation.text.toString(), imgSaturationDef, 0.0f, 2.0f))
+                putFloat(imgSharpnessKey, parseImg(binding.imgSharpness.text.toString(), imgSharpnessDef, 0.0f, 2.0f))
                 apply()
             }
         } catch (e: Exception) {
             Log.d("PVR-Java", "Exception caught in savePrefs.SettingsActivity : " + e.message)
             e.printStackTrace()
         }
+    }
+
+    private fun parseImg(text: String, def: Float, min: Float, max: Float): Float {
+        val v = text.replace(',', '.').toFloatOrNull() ?: def
+        return v.coerceIn(min, max)
     }
 
     private fun loadPrefs() {
@@ -301,6 +313,11 @@ class SettingsActivity : AppCompatActivity() {
         binding.offFov.setText(String.format(l, fmt2, prefs.getFloat(offFovKey, offFovDef)))
         binding.warp.isChecked = prefs.getBoolean(warpKey, warpDef)
         binding.debug.isChecked = prefs.getBoolean(debugKey, debugDef)
+        binding.imgBrightness.setText(String.format(l, fmt2, prefs.getFloat(imgBrightnessKey, imgBrightnessDef)))
+        binding.imgContrast.setText(String.format(l, fmt2, prefs.getFloat(imgContrastKey, imgContrastDef)))
+        binding.imgGamma.setText(String.format(l, fmt2, prefs.getFloat(imgGammaKey, imgGammaDef)))
+        binding.imgSaturation.setText(String.format(l, fmt2, prefs.getFloat(imgSaturationKey, imgSaturationDef)))
+        binding.imgSharpness.setText(String.format(l, fmt2, prefs.getFloat(imgSharpnessKey, imgSharpnessDef)))
     }
 
     private fun Util_IsVaildPort(port: Int): Boolean {
