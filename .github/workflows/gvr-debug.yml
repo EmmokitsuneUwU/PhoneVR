@@ -1,0 +1,44 @@
+name: GVR debug APK
+
+on:
+  push:
+    branches: [ cardboard ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build gvr debug APK
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Prepare deps (stops at the first failing command)
+        working-directory: code/mobile/android/PhoneVR
+        run: bash -ex prepare-alvr-deps.sh nogvr
+
+      - name: Check prepared files
+        working-directory: code/mobile/android/PhoneVR
+        run: |
+          ls -alh cardboard
+          ls -alh ALVR/build/alvr_client_core
+
+      - name: Build gvr debug APK
+        working-directory: code/mobile/android/PhoneVR
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :app:assembleGvrDebug --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: PhoneVR-gvr-debug-apk
+          path: code/mobile/android/PhoneVR/app/build/outputs/apk/gvr/debug/
